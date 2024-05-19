@@ -1,4 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.stt.springsecuritydemo4.mapper.UmsSysUserMapper">
+<mapper namespace="com.fcls.manager.mapper.UmsSysUserMapper">
+
+    <resultMap id="SysUserResultMap" type="com.fcls.manager.domain.entity.UmsSysUser">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="nickname" property="nickname"/>
+        <result column="email" property="email"/>
+        <result column="sex" property="sex"/>
+        <result column="avatar" property="avatar"/>
+        <result column="password" property="password"/>
+        <result column="status" property="status"/>
+        <result column="creator" property="creator"/>
+        <result column="updater" property="updater"/>
+        <result column="createTime" property="createTime"/>
+        <result column="updateTime" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+        <result column="remark" property="remark"/>
+        <collection property="roleSet" resultMap="RoleResultMap"/>
+    </resultMap>
+
+    <resultMap id="RoleResultMap" type="com.fcls.manager.domain.entity.UmsRole">
+        <id column="role_id" property="roleId"/>
+        <result column="role_label" property="roleLabel"/>
+        <result column="role_name" property="roleName"/>
+        <result column="sort" property="sort"/>
+        <result column="status" property="status"/>
+        <result column="deleted" property="deleted"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+    <!--  根据用户名查询用户和角色信息  -->
+    <select id="selectUserByUsername" resultMap="SysUserResultMap">
+        select
+            u.id,u.username,u.nickname,u.email,
+            u.sex,
+            u.avatar,
+            u.password,
+            u.status,
+            u.creator,
+            u.updater,
+            u.create_time,
+            u.update_time,
+            u.deleted,
+            u.remark,
+            r.role_id,
+            r.role_label,
+            r.role_name,
+            r.sort,
+            r.status,
+            r.deleted,
+            r.remark,
+            r.create_time,
+            r.update_time
+        from ums_sys_user u left join ums_sys_user_role sur on u.id = sur.user_id
+                            left join ums_role r on sur.role_id = r.role_id
+        where u.deleted = 0 and r.deleted = 0 and u.username = #{username}
+
+
+    </select>
+
 </mapper>

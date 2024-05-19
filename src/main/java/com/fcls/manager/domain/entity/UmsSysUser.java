@@ -5,11 +5,12 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.*;
+import java.util.stream.Collectors;
 
 // @Data注解可以自动生成getter、setter、无参构造
 // SpringSecurity会将认证的用户信息存储到UserDetails中
@@ -34,8 +35,23 @@ public class UmsSysUser implements Serializable, UserDetails {
     private Integer deleted;
     private String remark;
 
+    // 角色信息
+    private Set<UmsRole> roleSet = new HashSet<>();
+    //权限的信息
+    private List<String> perms = new ArrayList<>();
+
+    /**
+     * SpringSecurity根据 getAuthorities 方法获取当前用户的权限信息
+     * @return
+     */
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        // 将权限告知SpringSecurity，通过lambda表达式将Set<String>转成Collection<GrantedAuthority>
+        if(perms != null && perms.size() > 0) {
+            // 返回权限信息
+            return perms.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
+        }
         return null;
     }
 

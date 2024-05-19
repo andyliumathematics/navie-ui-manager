@@ -1,14 +1,15 @@
 package com.fcls.manager.domain.dto;
 
 import lombok.Data;
-
 import java.io.Serializable;
 
 /**
  * 登录参数
  */
-@Data
 public class LoginParams implements Serializable {
+
+    private String username;
+    private String password;
 
     public String getUsername() {
         return username;
@@ -25,8 +26,4 @@ public class LoginParams implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
-
-    private String username;
-    private String password;
-
 }
