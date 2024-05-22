@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.fcls.manager.domain.entity.PersistentLogins;
 import com.fcls.manager.mapper.PersistentLoginsMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.web.authentication.rememberme.PersistentRememberMeToken;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.stereotype.Component;
@@ -12,10 +14,10 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 @Component
-@Slf4j
 public class DaoCaoPersistentTokenRepositoryImpl implements PersistentTokenRepository {
 
     private final PersistentLoginsMapper persistentLoginsMapper;
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public DaoCaoPersistentTokenRepositoryImpl(PersistentLoginsMapper persistentLoginsMapper) {
         this.persistentLoginsMapper = persistentLoginsMapper;

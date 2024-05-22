@@ -22,6 +22,7 @@ import java.util.UUID;
 public class UmsSysUserServiceImpl extends ServiceImpl<UmsSysUserMapper, UmsSysUser> implements IUmsSysUserService {
     Logger log = LoggerFactory.getLogger(this.getClass());
 
+    //此方法是在SecurityConfig生成的bean
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
 
@@ -41,6 +42,7 @@ public class UmsSysUserServiceImpl extends ServiceImpl<UmsSysUserMapper, UmsSysU
                 new UsernamePasswordAuthenticationToken(loginParams.getUsername(), loginParams.getPassword());
         Authentication authentication = null;
         try {
+            //获取用户/权限信息
             authentication = authenticationManager.authenticate(authenticationToken);
         }catch (AuthenticationException e) {
             log.info("用户名或密码错误！");

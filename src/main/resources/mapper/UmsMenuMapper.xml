@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcls.manager.mapper.UmsMenuMapper">
+
+    <!--  根据角色查询权限
+        1、数据在menu表中
+        2、需要通过角色查询，角色和权限的关系在ums_role_menu中维护
+        3、需要多表查询，关系搞清楚
+        4、sql：in (1,2,3)
+      -->
+    <select id="selectMenuByRoleId" resultType="com.fcls.manager.domain.entity.UmsMenu">
+        select m.id,
+        m.parent_id,
+        m.menu_name,
+        m.sort,
+        m.perms,
+        m.menu_type,
+        m.icon,
+        m.deleted,
+        m.create_time,
+        m.update_time
+            from ums_menu m left join ums_role_menu urm on m.id = urm.menu_id
+        where urm.role_id in
+        <foreach collection="roleIds" open="(" close=")" separator="," item="roleId">
+            #{roleId}
+        </foreach>
+    </select>
+</mapper>

@@ -8,6 +8,11 @@ import java.util.Date;
 @TableName("persistent_logins")
 public class PersistentLogins {
 
+    private String series;
+    private String username;
+    private String token;
+    private Date lastUsed;
+
     public String getSeries() {
         return series;
     }
@@ -40,9 +45,5 @@ public class PersistentLogins {
         this.lastUsed = lastUsed;
     }
 
-    private String series;
-    private String username;
-    private String token;
-    private Date lastUsed;
 
 }

@@ -1,9 +1,8 @@
 package com.fcls.manager.config;
 
-import com.fcls.manager.serivice.impl.UmsSysUserServiceImpl;
-import com.fcls.manager.token.DaoCaoPersistentTokenRepositoryImpl;
 import com.fcls.manager.web.UmsSysUserDetailsService;
-import jakarta.annotation.Resource;
+import com.fcls.manager.web.filter.JwtAuthenticationFilter;
+import com.fcls.manager.web.manager.SttAuthorizationManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,23 +12,26 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Resource
-    private UmsSysUserDetailsService sysUserDetailsService;
+    //1.
     @Autowired
-    private DaoCaoPersistentTokenRepositoryImpl persistentTokenRepository;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private UmsSysUserDetailsService sysUserDetailsService;
+    //2
+    @Autowired
+    private SttAuthorizationManager authorizationManager;
 
     /**
+     * 启动时加载
      * 配置过滤器链，对login接口放行
      */
     @Bean
@@ -37,17 +39,18 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable());
         // 放行login接口
         http.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().access(authorizationManager)
         );
-
-        // 使用SpringSecurity默认的登录页面
+        // 将过滤器添加到过滤器链中
         http.formLogin(Customizer.withDefaults());
-        // 开启默认的记住我功能
-        http.rememberMe(remember -> remember.rememberMeCookieName("rememberMe").tokenRepository(persistentTokenRepository));
+        http.rememberMe(Customizer.withDefaults());
+        // 将过滤器添加到 UsernamePasswordAuthenticationFilter 之前
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     /**
+     * 启动时加载
      * AuthenticationManager：负责认证的
      * DaoAuthenticationProvider：负责将 sysUserDetailsService、passwordEncoder融合起来送到AuthenticationManager中
      * @param passwordEncoder
@@ -56,30 +59,21 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        //使用sysUserDetailsService给密码做验证
         provider.setUserDetailsService(sysUserDetailsService);
-        // 关联使用的密码编码器
+        // 关联使用的密码编码器 作为密码加密的算法
         provider.setPasswordEncoder(passwordEncoder);
+//        provider.setUserCache(new SpringCacheBasedUserCache(new ConcurrentMapCache("aaa")));
         // 将provider放置进 AuthenticationManager 中,包含进去
         ProviderManager providerManager = new ProviderManager(provider);
 
         return providerManager;
     }
 
+    //加密算法对象，用的是sha256加密
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    // 基于内存创建用户
-//    @Bean
-//    public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
-//        return new InMemoryUserDetailsManager(
-//                User.withUsername("admin")
-//                        .password("{noop}123456")
-//                        .build()
-//        );
-//    }
-//    @Bean
-//    public UserDetailsService myUserService(){
-//        return new UmsSysUserDetailsService();
-//    }
+
 }
